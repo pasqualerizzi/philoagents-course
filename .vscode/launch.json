@@ -48,6 +48,15 @@
             "env": {
                 "MONGO_URI": "mongodb://philoagents:philoagents@localhost:27017/?directConnection=true"
             }
-        }
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<spring.ai.philoagents>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/philoagents-java-api",
+            "mainClass": "spring.ai.philoagents.Application",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }        
     ]
 }
