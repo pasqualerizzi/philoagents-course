@@ -1,4 +1,4 @@
-package com.finconsgroup.spring.ai.philoagents;
+package spring.ai.philoagents;
 
 import org.junit.jupiter.api.Test;
 
