@@ -15,6 +15,7 @@ import org.bsc.langgraph4j.studio.springboot.AbstractLangGraphStudioConfig;
 import org.bsc.langgraph4j.studio.springboot.LangGraphFlow;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,7 +49,7 @@ public class LangGraphStudioSampleConfig extends AbstractLangGraphStudioConfig {
     @Value("${philoagents.langgraph.postgressaver.createtables}")
     private boolean createTables;
 
-    public LangGraphStudioSampleConfig(ChatModel chatModel, PhilosopherService philosopherService) throws GraphStateException {
+    public LangGraphStudioSampleConfig(@Qualifier("openAiChatModel") ChatModel chatModel, PhilosopherService philosopherService) throws GraphStateException {
         this.philosopherService = philosopherService;
         var workflow = PhilosopherAgentExecutor.graphBuilder().chatModel(chatModel)
         .toolsFromObject(new DateTimeTools())

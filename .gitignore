@@ -317,3 +317,4 @@ philoagents-java-api/target/*
 philoagents-java-api/embedding-cache/*
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,python,visualstudiocode,pycharm+all
+philoagents-java-api/src/main/resources/application-local.properties
