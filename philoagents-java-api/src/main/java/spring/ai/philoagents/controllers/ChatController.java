@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.bsc.langgraph4j.CompileConfig;
 import org.bsc.langgraph4j.RunnableConfig;
-import org.bsc.langgraph4j.checkpoint.MemorySaver;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.http.HttpStatusCode;
@@ -37,13 +36,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class ChatController {
 
   private final OpenAiChatModel chatModel;
-  private MemorySaver memorySaver;
   private PhilosopherService philosopherService;
 
-  public ChatController(OpenAiChatModel chatModel, MemorySaver memorySaver, PhilosopherService philosopherService) {
-
+  public ChatController(OpenAiChatModel chatModel,
+      PhilosopherService philosopherService) {
     this.chatModel = chatModel;
-    this.memorySaver = memorySaver;
     this.philosopherService = philosopherService;
   }
 
@@ -52,10 +49,10 @@ public class ChatController {
   public ResponseEntity<Object> chat(@RequestBody ChatBody chatBody) throws Exception {
     log.info("Starting Multi-Agent AI Application");
     Philosopher philosopher = PhilosopherFactory.getPhilosopher(chatBody.philosopher_id());
-    var agent = PhilosopherAgentExecutor.graphBuilder().chatModel(chatModel)
-        // .toolsFromObject(new RetrievePhilosopherContext())
+    var agent = PhilosopherAgentExecutor.graphBuilder().chatModel(chatModel).conversationId(philosopher.getId())
         .build(philosopherService)
-        .compile(CompileConfig.builder().checkpointSaver(memorySaver).releaseThread(false).build());
+        .compile(CompileConfig.builder()
+            .build());
     var runnableConfig = RunnableConfig.builder().threadId(philosopher.getId()).build();
     var result = agent.invoke(Map.<String, Object>of(
         PhilosopherState.PN_KEY, philosopher.getId(),
@@ -96,7 +93,7 @@ public class ChatController {
   @GetMapping("/reset-memory")
   public Flux<String> resetMemory(@RequestParam(required = true) String philosopher_name) throws Exception {
     Philosopher philosopher = PhilosopherFactory.getPhilosopher(philosopher_name);
-    memorySaver.release(RunnableConfig.builder().threadId(philosopher.getId()).build());
+    philosopherService.resetPhilosopherMemory(philosopher.getId());
     return Flux.just("Memory reset");
   }
 

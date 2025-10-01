@@ -1,22 +1,15 @@
 package spring.ai.philoagents.config;
 
-import java.sql.SQLException;
+import java.util.Map;
 import java.util.Objects;
 
-import org.bsc.langgraph4j.CompileConfig;
-import org.bsc.langgraph4j.GraphRepresentation;
 import org.bsc.langgraph4j.GraphStateException;
 import org.bsc.langgraph4j.StateGraph;
-import org.bsc.langgraph4j.checkpoint.MemorySaver;
-import org.bsc.langgraph4j.checkpoint.PostgresSaver;
-import org.bsc.langgraph4j.spring.ai.serializer.std.SpringAIStateSerializer;
-import org.bsc.langgraph4j.state.AgentState;
-import org.bsc.langgraph4j.studio.springboot.AbstractLangGraphStudioConfig;
-import org.bsc.langgraph4j.studio.springboot.LangGraphFlow;
+import org.bsc.langgraph4j.studio.LangGraphStudioServer;
+import org.bsc.langgraph4j.studio.springboot.LangGraphStudioConfig;
 import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import spring.ai.philoagents.services.PhilosopherService;
@@ -28,67 +21,35 @@ import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @Slf4j
-public class LangGraphStudioSampleConfig extends AbstractLangGraphStudioConfig {
+public class LangGraphStudioSampleConfig extends LangGraphStudioConfig  {
 
-    final LangGraphFlow flow;
+    @Autowired
+    private OpenAiChatModel chatModel;
+    @Autowired
     private PhilosopherService philosopherService;
 
-    @Value("${philoagents.langgraph.postgressaver.host}")
-    private String host;
-    @Value("${philoagents.langgraph.postgressaver.port}")
-    private int port;
-    @Value("${philoagents.langgraph.postgressaver.database}")
-    private String database;
-    @Value("${philoagents.langgraph.postgressaver.username}")
-    private String username;
-    @Value("${philoagents.langgraph.postgressaver.password}")   
-    private String password;
-    @Value("${philoagents.langgraph.postgressaver.droptablefirst}")
-    private boolean dropTablesFirst;
-    @Value("${philoagents.langgraph.postgressaver.createtables}")
-    private boolean createTables;
-
-    public LangGraphStudioSampleConfig(ChatModel chatModel, PhilosopherService philosopherService) throws GraphStateException {
-        this.philosopherService = philosopherService;
-        var workflow = PhilosopherAgentExecutor.graphBuilder().chatModel(chatModel)
-        .toolsFromObject(new DateTimeTools())
-        .build(this.philosopherService);
-
-        var mermaid = workflow.getGraph( GraphRepresentation.Type.MERMAID, "ReAct Agent", false );
-        log.debug( mermaid.content() );
-        this.flow = agentWorkflow( workflow );
-    }
-
-    private LangGraphFlow agentWorkflow( StateGraph<? extends AgentState> workflow ) throws GraphStateException {        
-        return  LangGraphFlow.builder()
-                .title("LangGraph Studio (Spring AI)")
+    @Override
+    public Map<String, LangGraphStudioServer.Instance> instanceMap() {
+        StateGraph<PhilosopherState> workflow = null;
+        try {
+            workflow = createWorkflow();
+        } catch (GraphStateException e) {
+            log.error("Failed to create workflow", e);
+            throw new RuntimeException(e);
+        }
+        var instance = LangGraphStudioServer.Instance.builder()
+                .title("LangGraph Studio")
+                .graph(workflow)
                 .addInputStringArg( "messages", true, v -> new UserMessage( Objects.toString(v) ) )
                 .addInputStringArg( "philosopher_name", true, v -> v.toString() )
-                .stateGraph( workflow )
-                .compileConfig( CompileConfig.builder()
-                        .checkpointSaver( new MemorySaver() )
-                        .releaseThread(false)
-                        .build())
                 .build();
 
-    }    
-
-    @Bean
-    MemorySaver getMemorySaver() throws SQLException {
-        return PostgresSaver.builder()
-            .host(host)
-            .port(port)
-            .user(username)
-            .password(password)
-            .database(database)
-            .stateSerializer( new SpringAIStateSerializer<>(PhilosopherState::new) )
-            .dropTablesFirst(dropTablesFirst)
-            .createTables(createTables)
-            .build();
+        return Map.of("default", instance);
     }
 
-    @Override
-    public LangGraphFlow getFlow() {
-        return this.flow;
-    }
+    private StateGraph<PhilosopherState> createWorkflow() throws GraphStateException{
+        return PhilosopherAgentExecutor.graphBuilder().chatModel(chatModel)
+        .toolsFromObject(new DateTimeTools())
+        .build(this.philosopherService);
+    }   
 }

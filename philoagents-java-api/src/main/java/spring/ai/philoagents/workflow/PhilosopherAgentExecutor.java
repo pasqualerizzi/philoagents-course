@@ -15,6 +15,9 @@ import static org.bsc.langgraph4j.action.AsyncEdgeAction.edge_async;
 import static org.bsc.langgraph4j.action.AsyncNodeAction.node_async;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
@@ -144,16 +147,17 @@ public interface PhilosopherAgentExecutor {
             if (stateSerializer == null) {
                 stateSerializer =  new SpringAIStateSerializer<>(PhilosopherState::new);
             }
-            //build chatClient here instead of having it in PhilosopherService and passit to philospherService methods call by call
+
+            ChatMemory chatMemory = MessageWindowChatMemory.builder().build();
 
             Objects.requireNonNull(this.chatModel, "chatModel cannot be null!");
             var toolOptions = ToolCallingChatOptions.builder().internalToolExecutionEnabled(true).build();
-            var chatClientBuilder = ChatClient.builder(this.chatModel).defaultOptions(toolOptions)
+            var chatClientBuilder = ChatClient.builder(this.chatModel)
+                    .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory)
+                            .conversationId(this.conversationId != null ? this.conversationId : "default").build())
+                    .defaultOptions(toolOptions)
                     .defaultSystem(this.systemMessage != null ? this.systemMessage
                             : "You are a helpful AI Assistant answering questions.");
-/*             if (!this.tools.isEmpty()) {
-                chatClientBuilder.defaultToolCallbacks(this.tools);
-            } */
             ChatClient chatClient = chatClientBuilder.build();
 
             return new StateGraph<>(PhilosopherState.SCHEMA, stateSerializer)

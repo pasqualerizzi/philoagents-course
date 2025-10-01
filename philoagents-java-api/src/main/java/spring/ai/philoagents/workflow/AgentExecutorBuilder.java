@@ -14,6 +14,7 @@ import org.springframework.ai.tool.ToolCallbackProvider;
 public abstract class AgentExecutorBuilder<B extends AgentExecutorBuilder<B, S>, S extends AgentState> {
         StateSerializer<S> stateSerializer;
     ChatModel chatModel;
+    String conversationId;
     String systemMessage;
     boolean streaming = false;
 
@@ -73,6 +74,11 @@ public abstract class AgentExecutorBuilder<B extends AgentExecutorBuilder<B, S>,
     public B toolsFromObject(Object objectWithTools) {
         var tools = ToolCallbacks.from(Objects.requireNonNull(objectWithTools, "objectWithTools cannot be null"));
         this.tools.addAll(List.of(tools));
+        return result();
+    }
+
+    public B conversationId(String conversationId) {
+        this.conversationId = conversationId;
         return result();
     }
 
