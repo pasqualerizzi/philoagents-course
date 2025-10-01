@@ -8,7 +8,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.bsc.langgraph4j.CompileConfig;
 import org.bsc.langgraph4j.GraphStateException;
 import org.bsc.langgraph4j.RunnableConfig;
-import org.bsc.langgraph4j.checkpoint.MemorySaver;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.stereotype.Component;
@@ -33,13 +32,12 @@ import lombok.extern.slf4j.Slf4j;
 public class SocketHandler extends TextWebSocketHandler {
 
     private final OpenAiChatModel chatModel;
-    private MemorySaver memorySaver;
     private PhilosopherService philosopherService;
- 	List sessions = new CopyOnWriteArrayList<>();
+    List sessions = new CopyOnWriteArrayList<>();
 
-    public SocketHandler(OpenAiChatModel chatModel, MemorySaver memorySaver, PhilosopherService philosopherService) {
+    public SocketHandler(OpenAiChatModel chatModel,
+            PhilosopherService philosopherService) {
         this.chatModel = chatModel;
-        this.memorySaver = memorySaver;
         this.philosopherService = philosopherService;
     }
 
@@ -51,23 +49,24 @@ public class SocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        log.info("Connection closed by {}:{}", session.getRemoteAddress().getHostString(), session.getRemoteAddress().getPort());
+        log.info("Connection closed by {}:{}", session.getRemoteAddress().getHostString(),
+                session.getRemoteAddress().getPort());
         super.afterConnectionClosed(session, status);
     }
 
- 	@Override
+    @Override
     @SneakyThrows
- 	public void handleTextMessage(WebSocketSession session, TextMessage message)
- 			throws InterruptedException, IOException, GraphStateException {
+    public void handleTextMessage(WebSocketSession session, TextMessage message)
+            throws InterruptedException, IOException, GraphStateException {
         session.sendMessage(new TextMessage(new Gson().toJson(Map.of("streaming", true))));
         Map<String, String> value = new Gson().fromJson(message.getPayload(), Map.class);
         log.info("Starting Multi-Agent AI Application");
         String id = value.get("philosopher_id");
         Philosopher philosopher = PhilosopherFactory.getPhilosopher(id);
-        var agent = PhilosopherAgentExecutor.graphBuilder().chatModel(chatModel)
-                // .toolsFromObject(new RetrievePhilosopherContext())
+        var agent = PhilosopherAgentExecutor.graphBuilder().chatModel(chatModel).conversationId(philosopher.getId())
                 .build(philosopherService)
-                .compile(CompileConfig.builder().checkpointSaver(memorySaver).releaseThread(false).build());
+                .compile(CompileConfig.builder()
+                        .build());
         var runnableConfig = RunnableConfig.builder().threadId(id).build();
         var result = agent.invoke(Map.<String, Object>of(PhilosopherState.PN_KEY, philosopher.getName(),
                 PhilosopherState.PS_KEY, philosopher.getStyle(), PhilosopherState.PP_KEY, philosopher.getPerspective(),
@@ -75,7 +74,7 @@ public class SocketHandler extends TextWebSocketHandler {
         // Use getContent() if available, otherwise fallback to toString()
         String output = result.lastMessage().map(content -> content.getText()).orElse("UNKNOWN");
         log.info(output);
-        //chunking the output
+        // chunking the output
         String[] chunks = output.split("(?<=\\G.{100})");
         for (String chunk : chunks) {
             session.sendMessage(new TextMessage(new Gson().toJson(Map.of("chunk", chunk))));

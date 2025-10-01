@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
+import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -49,11 +50,14 @@ public class PhilosopherService {
     private final VectorStore vectorStore;
     private final RetrievePhilosopherContext retrievePhilosopherContext;
     private final PhilosopherSearchRepository philosopherSearchRepository;
+    private final ChatMemoryRepository chatMemoryRepository;
 
-    public PhilosopherService(VectorStore vectorStore, RetrievePhilosopherContext retrievePhilosopherContext, PhilosopherSearchRepository philosopherSearchRepository) {
+    public PhilosopherService(VectorStore vectorStore, RetrievePhilosopherContext retrievePhilosopherContext, 
+    PhilosopherSearchRepository philosopherSearchRepository, ChatMemoryRepository chatMemoryRepository) {
         this.vectorStore = vectorStore;
         this.retrievePhilosopherContext = retrievePhilosopherContext;
         this.philosopherSearchRepository = philosopherSearchRepository;
+        this.chatMemoryRepository = chatMemoryRepository;
     }
 
     public ChatResponse getPhilosopherResponse(PhilosopherState state, ChatClient chatClient) throws Exception {
@@ -183,5 +187,9 @@ public class PhilosopherService {
         return results.stream()
             .map(doc -> Map.of("content", doc.getText(), "metadata", doc.getMetadata()))
             .collect(Collectors.toList());
-    }   
+    }  
+    
+    public void resetPhilosopherMemory(String philosopherId) {
+        chatMemoryRepository.deleteByConversationId(philosopherId);
+    }
 }

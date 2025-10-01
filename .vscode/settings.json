@@ -13,5 +13,6 @@
         "notebook.source.organizeImports": true
     },
     "python.defaultInterpreterPath": "philoagents-api/.venv/bin/python",
-    "java.compile.nullAnalysis.mode": "disabled"
+    "java.compile.nullAnalysis.mode": "disabled",
+    "java.configuration.updateBuildConfiguration": "interactive"
 }
