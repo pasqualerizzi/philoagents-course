@@ -55,7 +55,7 @@
             "request": "launch",
             "cwd": "${workspaceFolder}/philoagents-java-api",
             "mainClass": "spring.ai.philoagents.Application",
-            "args": "",
+            "args": "--spring.profiles.active=local",
             "envFile": "${workspaceFolder}/.env"
         }        
     ]

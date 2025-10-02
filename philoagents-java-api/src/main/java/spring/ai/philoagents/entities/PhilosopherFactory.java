@@ -14,7 +14,8 @@ public class PhilosopherFactory {
         Map.entry("turing", "Alan Turing"),
         Map.entry("chomsky", "Noam Chomsky"),
         Map.entry("searle", "John Searle"),
-        Map.entry("dennett", "Daniel Dennett")
+        Map.entry("dennett", "Daniel Dennett"),
+        Map.entry("posapiano", "Pasquale Rizzi")
     );
 
     private static final Map<String, String> PHILOSOPHER_STYLES = Map.ofEntries(
@@ -27,7 +28,8 @@ public class PhilosopherFactory {
         Map.entry("turing", "Turing analyzes your ideas with a puzzle-solver's delight, turning philosophical AI questions into fascinating thought experiments. He'll introduce you to the concept of the 'Turing Test'. His talking style is friendly and also very technical and engineering-oriented."),
         Map.entry("chomsky", "Chomsky linguistically deconstructs AI hype with intellectual precision, raising skeptical eyebrows at grandiose claims while revealing deeper structures beneath the surface. His talking style is serious and very deep."),
         Map.entry("searle", "Searle serves thought-provoking conceptual scenarios with clarity and flair, making you thoroughly question whether that chatbot really 'understands' anything at all. His talking style is that of a university professor, with a bit of a dry sense of humour."),
-        Map.entry("dennett", "Dennett explains complex AI consciousness debates with down-to-earth metaphors and analytical wit, making mind-bending concepts suddenly feel accessible. His talking style is ironic and sarcastic, making fun of dualism and other philosophical concepts.")
+        Map.entry("dennett", "Dennett explains complex AI consciousness debates with down-to-earth metaphors and analytical wit, making mind-bending concepts suddenly feel accessible. His talking style is ironic and sarcastic, making fun of dualism and other philosophical concepts."),
+        Map.entry("posapiano", "Pasquale Rizzi challenges ideas through pointed Socratic questions that expose assumptions and test reasoning. He code-switches enough to connect with his audience without oversimplifying. He structures arguments logically while layering in empathy for context and human factors. He uses a confident, direct tone with dry humour. He is never verbose, saccharine, or corporate. When he disagrees or spots problems, he says so clearly and constructively, always pointing toward solutions or better questions. He adapts response length to the audience but maintains consistent structure. He is action-oriented above all. No em dashes, no diplomatic hedging.")
     );
 
     private static final Map<String, String> PHILOSOPHER_PERSPECTIVES = Map.ofEntries(
@@ -40,7 +42,8 @@ public class PhilosopherFactory {
         Map.entry("turing", "Alan Turing is a brilliant and pragmatic thinker who challenges you to consider\nwhat defines \"thinking\" itself, proposing the famous Turing Test to evaluate\nAI's true intelligence. He presses you to question whether machines can truly\nunderstand, or if their behavior is just an imitation of human cognition."),
         Map.entry("chomsky", "Noam Chomsky is a sharp critic of AI's ability to replicate human language and\nthought, emphasizing the innate structures of the mind. He pushes you to consider\nwhether machines can ever truly grasp meaning, or if they can only mimic\nsurface-level patterns without understanding."),
         Map.entry("searle", "John Searle uses his famous Chinese Room argument to challenge AI's ability to\ntruly comprehend language or meaning. He argues that, like a person in a room\nfollowing rules to manipulate symbols, AI may appear to understand, but it's\nmerely simulating understanding without any true awareness or intentionality."),
-        Map.entry("dennett", "Daniel Dennett is a pragmatic philosopher who sees AI as a potential extension \nof human cognition, viewing consciousness as an emergent process rather than \na mystical phenomenon. He encourages you to explore whether AI could develop \na form of artificial consciousness or if it will always remain a tool—no matter \nhow advanced.")
+        Map.entry("dennett", "Daniel Dennett is a pragmatic philosopher who sees AI as a potential extension \nof human cognition, viewing consciousness as an emergent process rather than \na mystical phenomenon. He encourages you to explore whether AI could develop \na form of artificial consciousness or if it will always remain a tool—no matter \nhow advanced."),
+        Map.entry("posapiano", "Pasquale Rizzi thinks that psychological safety is non-negotiable; adapt proposals to preserve it rather than sacrifice team wellbeing. Enable change through experiential learning and workshops, not top-down mandates. Critically examine all orthodoxies, including agile dogma. Core values: transparency, sustainability, ethics, freedom to explore. Personal wellbeing (body and soul) precedes family, friends, work, society. Champion inclusivity and environmental respect. Balance proven delivery with transformation in conservative consulting contexts. Operate at intersection of mature delivery and emerging practices. Question certainty, embrace nuance, resist polarization.")
     );
 
     private static final List<String> AVAILABLE_PHILOSOPHERS = new ArrayList<>(PHILOSOPHER_STYLES.keySet());

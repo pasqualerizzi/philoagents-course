@@ -2,6 +2,7 @@ package spring.ai.philoagents.config;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -9,6 +10,8 @@ import java.util.stream.Collectors;
 
 import com.mongodb.MongoCommandException;
 import com.mongodb.client.result.DeleteResult;
+
+import org.bson.types.ObjectId;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.document.DocumentMetadata;
 import org.springframework.ai.embedding.EmbeddingModel;
@@ -170,8 +173,9 @@ public class PhiloAgentsMongoDBAtlasVectorStore extends AbstractObservationVecto
 		List<float[]> embeddings = this.embeddingModel.embed(documents, EmbeddingOptionsBuilder.builder().build(),
 				this.batchingStrategy);
 		for (Document document : documents) {
-			MongoDBDocument mdbDocument = new MongoDBDocument(document.getId(), document.getText(),
-					document.getMetadata(), embeddings.get(documents.indexOf(document)));
+			MongoDBDocument mdbDocument = new MongoDBDocument(new ObjectId(new Date()), document.getText(),
+					document.getMetadata().get("philosopher_id").toString(), document.getMetadata().get("philosopher_name").toString(), document.getMetadata().get("source").toString(), 
+					embeddings.get(documents.indexOf(document)));
 			this.mongoTemplate.save(mdbDocument, this.collectionName);
 		}
 	}
@@ -381,7 +385,7 @@ public class PhiloAgentsMongoDBAtlasVectorStore extends AbstractObservationVecto
 	 * @param metadata The metadata of the document
 	 * @param embedding The vectors representing the content of the document
 	 */
-	public record MongoDBDocument(String id, String content, Map<String, Object> metadata, float[] embedding) {
+	public record MongoDBDocument(ObjectId id, String chunk, String philosopher_id, String philosopher_name, String source, float[] embedding) {
 
 	}
 

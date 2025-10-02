@@ -91,6 +91,10 @@ Once you completed the previous step, connect locally your MongoDBCompass client
     {
       "type": "filter",
       "path": "philosopher_name"
+    },
+    {
+      "type": "filter",
+      "path": "philosopher_id"
     }
   ]
 }

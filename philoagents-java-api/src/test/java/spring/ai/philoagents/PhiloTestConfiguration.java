@@ -10,10 +10,12 @@ import org.springframework.ai.ollama.management.PullModelStrategy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistrar;
 import org.testcontainers.ollama.OllamaContainer;
 
 @TestConfiguration(proxyBeanMethods = false)
+@ActiveProfiles("test")
 public class PhiloTestConfiguration {
 
     @Bean
