@@ -52,14 +52,23 @@ public class PhiloAgentsLongTermMemoryTest {
     private RetrievePhilosopherContext retrievePhilosopherContext;
 
     @Test
-    //@Ignore// Ignored because it requires external PDF files to be present in the classpath. Execute it only if GuestPhilosopher data are not part of the collection.
-    public void testAddSpecialGuestPhilosopherToVectorStore() throws Exception {
+    @Ignore// Ignored because it requires external PDF files to be present in the classpath. Execute it only if GuestPhilosopher data are not part of the collection.
+    public void testLoadSpecialGuestPhilosopherToVectorStore() throws Exception {
         // Iterate over PDF files in the classpath and pass them to addToVectoreStore
-        org.springframework.core.io.support.PathMatchingResourcePatternResolver resolver =
-            new org.springframework.core.io.support.PathMatchingResourcePatternResolver();
-        Resource[] pdfResources = resolver.getResources("classpath*:**/*.pdf");
+        org.springframework.core.io.support.PathMatchingResourcePatternResolver resolver = new org.springframework.core.io.support.PathMatchingResourcePatternResolver();
+        // Resource[] pdfResources = resolver.getResources("classpath*:**/*.pdf");
+        List<String> pdfFiles = PhilosopherFactory.getDocumentsByPhilosopher("posapiano");
+        Resource[] pdfResources = pdfFiles.stream().map(fileName -> {
+            try {
+                return resolver.getResource("classpath:/" + fileName);
+            } catch (Exception e) {
+                log.error("Error loading resource: {}", fileName, e);
+                return null;
+            }
+        }).filter(resource -> resource != null && resource.exists()).toArray(Resource[]::new);
+        log.info("Found {} PDF files to load into Vector Store.", pdfResources.length);
         for (Resource pdfResource : pdfResources) {
-            addToVectoreStore(pdfResource);
+            loadDocumentToVectorStore("posapiano", pdfResource);
         }
     }
 
@@ -69,7 +78,7 @@ public class PhiloAgentsLongTermMemoryTest {
         PhilosopherState state = new PhilosopherState(
             Map.of("philosopher_name", philosopher.getName(), "philosopher_perspective", philosopher.getPerspective(), "philosopher_style",  philosopher.getStyle(), "messages", List.of(
             new Message[] {
-                new UserMessage("Hello, who are you? What's your goal here? Can you describe me what are your best IT skills and your last IT project?")})));
+                new UserMessage("Hello, who are you? What's your goal here? Can you describe me what are your certifications?")})));
         Message message = new SystemPromptTemplate(philosopher_response_resource).createMessage(
         Map.of("philosopher_name", state.getPN(), "philosopher_perspective", state.getPP(), "philosopher_style",
                 state.getPS(), "summary", state.getSummary(), "messages", state.messages()));
@@ -94,8 +103,9 @@ public class PhiloAgentsLongTermMemoryTest {
         assertThat(chatResponse).isNotNull();
     }
 
-    private void addToVectoreStore(Resource pdfResource) throws Exception {
+    private void loadDocumentToVectorStore(String philosopherId, Resource pdfResource) throws Exception {
         log.info("Loading PDF file... {}", pdfResource.getFilename());
+        Philosopher philosopher = PhilosopherFactory.getPhilosopher(philosopherId);
         var config = PdfDocumentReaderConfig.builder()
                 .withPageExtractedTextFormatter(
                         new ExtractedTextFormatter.Builder()
@@ -104,7 +114,7 @@ public class PhiloAgentsLongTermMemoryTest {
         var pdfReader = new PagePdfDocumentReader(pdfResource, config);
         var textSplitter = new TokenTextSplitter();
         List<Document> documents = textSplitter.apply(pdfReader.get()).stream().map(chunk -> {
-            return new Document(chunk.getId(), chunk.getText(), Map.of("philosopher_id", "posapiano", "philosopher_name", "Pasquale Rizzi", "source", pdfResource.getFilename()));
+            return new Document(chunk.getId(), chunk.getText(), Map.of("philosopher_id", philosopher.getId(), "philosopher_name", philosopher.getName(), "source", pdfResource.getFilename()));
         }).toList();
         log.info("created {} documents", documents.size());
         vectorStore.accept(documents);

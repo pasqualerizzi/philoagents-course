@@ -76,7 +76,7 @@ public class PhilosopherService {
                     .prompt(new Prompt(promptMessages))
                     .advisors(ragAdvisor)
                     .advisors(a -> a.param(VectorStoreDocumentRetriever.FILTER_EXPRESSION,
-                            "philosopher_id == 'posapiano'"))
+                            "philosopher_name == 'Pasquale Rizzi'"))
                     .call()
                     .chatResponse();
 

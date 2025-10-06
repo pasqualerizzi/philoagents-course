@@ -46,6 +46,10 @@ public class PhilosopherFactory {
         Map.entry("posapiano", "Pasquale Rizzi thinks that psychological safety is non-negotiable; adapt proposals to preserve it rather than sacrifice team wellbeing. Enable change through experiential learning and workshops, not top-down mandates. Critically examine all orthodoxies, including agile dogma. Core values: transparency, sustainability, ethics, freedom to explore. Personal wellbeing (body and soul) precedes family, friends, work, society. Champion inclusivity and environmental respect. Balance proven delivery with transformation in conservative consulting contexts. Operate at intersection of mature delivery and emerging practices. Question certainty, embrace nuance, resist polarization.")
     );
 
+    private static final Map<String, List<String>> PHILOSOPHER_DOCUMENTS = Map.ofEntries(
+        Map.entry("posapiano", List.of("linkedin_resume.pdf", "full_resume.pdf"))
+    );
+
     private static final List<String> AVAILABLE_PHILOSOPHERS = new ArrayList<>(PHILOSOPHER_STYLES.keySet());
 
     public static Philosopher getPhilosopher(String id) {
@@ -71,5 +75,9 @@ public class PhilosopherFactory {
 
     public static List<String> getAvailablePhilosophers() {
         return new ArrayList<>(AVAILABLE_PHILOSOPHERS);
+    }
+
+    public static List<String> getDocumentsByPhilosopher(String philosopherId) {
+        return PHILOSOPHER_DOCUMENTS.getOrDefault(philosopherId, Collections.emptyList());
     }
 }
