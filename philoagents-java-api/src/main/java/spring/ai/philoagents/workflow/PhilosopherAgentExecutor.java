@@ -2,8 +2,6 @@ package spring.ai.philoagents.workflow;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-
 import org.bsc.langgraph4j.GraphStateException;
 import org.bsc.langgraph4j.StateGraph;
 import org.bsc.langgraph4j.action.EdgeAction;
@@ -149,17 +147,14 @@ public interface PhilosopherAgentExecutor {
             }
 
             ChatMemory chatMemory = MessageWindowChatMemory.builder().build();
-
-            Objects.requireNonNull(this.chatModel, "chatModel cannot be null!");
             var toolOptions = ToolCallingChatOptions.builder().internalToolExecutionEnabled(true).build();
-            var chatClientBuilder = ChatClient.builder(this.chatModel)
+            this.chatClient.mutate()
                     .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory)
                             .conversationId(this.conversationId != null ? this.conversationId : "default").build())
                     .defaultOptions(toolOptions)
                     .defaultSystem(this.systemMessage != null ? this.systemMessage
-                            : "You are a helpful AI Assistant answering questions.");
-            ChatClient chatClient = chatClientBuilder.build();
-
+                            : "You are a helpful AI Assistant answering questions.")
+                    .build();
             return new StateGraph<>(PhilosopherState.SCHEMA, stateSerializer)
                     //define nodes
                     .addNode("conversationNode", node_async(state ->get_conversation_node(state, philosopherService, chatClient)))

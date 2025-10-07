@@ -8,10 +8,7 @@ import org.bsc.langgraph4j.StateGraph;
 import org.bsc.langgraph4j.studio.LangGraphStudioServer;
 import org.bsc.langgraph4j.studio.springboot.LangGraphStudioConfig;
 import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-
 import spring.ai.philoagents.services.PhilosopherService;
 import spring.ai.philoagents.tools.DateTimeTools;
 import spring.ai.philoagents.workflow.PhilosopherAgentExecutor;
@@ -19,12 +16,10 @@ import spring.ai.philoagents.workflow.PhilosopherState;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Configuration
+
 @Slf4j
 public class LangGraphStudioSampleConfig extends LangGraphStudioConfig  {
 
-    @Autowired
-    private OpenAiChatModel chatModel;
     @Autowired
     private PhilosopherService philosopherService;
 
@@ -48,7 +43,7 @@ public class LangGraphStudioSampleConfig extends LangGraphStudioConfig  {
     }
 
     private StateGraph<PhilosopherState> createWorkflow() throws GraphStateException{
-        return PhilosopherAgentExecutor.graphBuilder().chatModel(chatModel)
+        return PhilosopherAgentExecutor.graphBuilder()
         .toolsFromObject(new DateTimeTools())
         .build(this.philosopherService);
     }   
