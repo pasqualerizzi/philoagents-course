@@ -16,6 +16,7 @@ public class PhilosopherState extends MessagesState<Message>{
     public static final String PS_KEY = "philosopher_style";
     public static final String SUMMARY_KEY = "summary";
     public static final String CONTEXT_KEY = "context";
+    public static final String CONVERSATION_ID_KEY = "conversation_id";
 
     // Define the schema for the state.
     // MESSAGES_KEY will hold a list of strings, and new messages will be appended.
@@ -24,7 +25,8 @@ public class PhilosopherState extends MessagesState<Message>{
             PP_KEY, Channels.<String>base(() -> ""),
             PS_KEY, Channels.<String>base(() -> ""),
             SUMMARY_KEY, Channels.<String>base(() -> ""),
-            CONTEXT_KEY, Channels.<String>base(() -> ""))
+            CONTEXT_KEY, Channels.<String>base(() -> ""),
+            CONVERSATION_ID_KEY, Channels.<String>base(() -> ""))
     );
 
     public PhilosopherState(Map<String, Object> initData) {
@@ -46,7 +48,10 @@ public class PhilosopherState extends MessagesState<Message>{
     public String getContext() {
         return (String) value(CONTEXT_KEY).orElse("");
     }
+    public String getConversationId() {
+        return (String) value(CONVERSATION_ID_KEY).orElse("");
+    }    
     public Optional<String> next() {
         return this.value("next");
-    }   
+    }
 }

@@ -1,4 +1,4 @@
-package spring.ai.philoagents.config;
+package spring.ai.philoagents.override;
 
 import org.springframework.ai.vectorstore.filter.Filter;
 import org.springframework.ai.vectorstore.mongodb.atlas.MongoDBAtlasFilterExpressionConverter;

@@ -18,6 +18,7 @@ import org.springframework.util.CollectionUtils;
 
 import io.micrometer.observation.ObservationRegistry;
 import lombok.extern.slf4j.Slf4j;
+import spring.ai.philoagents.override.PhiloAgentsMongoDBAtlasVectorStore;
 
 @Configuration
 @ConditionalOnProperty(name = SpringAIVectorStoreTypes.TYPE, havingValue = SpringAIVectorStoreTypes.MONGODB_ATLAS, matchIfMissing = true)

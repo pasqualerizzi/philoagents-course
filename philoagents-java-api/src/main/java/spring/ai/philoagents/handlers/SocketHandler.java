@@ -3,19 +3,12 @@ package spring.ai.philoagents.handlers;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bsc.langgraph4j.CompileConfig;
 import org.bsc.langgraph4j.GraphStateException;
 import org.bsc.langgraph4j.RunnableConfig;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -38,21 +31,12 @@ import lombok.extern.slf4j.Slf4j;
 public class SocketHandler extends TextWebSocketHandler {
 
     private PhilosopherService philosopherService;
-    private ChatClient chatClient;
-    private ChatModel chatModel;
     List sessions = new CopyOnWriteArrayList<>();
 
     public SocketHandler(
-            PhilosopherService philosopherService, ChatModel chatModel) {
+            PhilosopherService philosopherService) {
         this.philosopherService = philosopherService;
-        this.chatModel = chatModel;
-        ChatMemory chatMemory = MessageWindowChatMemory.builder().build();
-        Objects.requireNonNull(this.chatModel, "chatModel cannot be null!");
-        var toolOptions = ToolCallingChatOptions.builder().internalToolExecutionEnabled(true).build();
-        var chatClientBuilder = ChatClient.builder(this.chatModel)
-                .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
-                .defaultOptions(toolOptions);
-        this.chatClient = chatClientBuilder.build();
+
     }
 
     @Override
@@ -77,14 +61,15 @@ public class SocketHandler extends TextWebSocketHandler {
         log.info("Starting Multi-Agent AI Application");
         String id = value.get("philosopher_id");
         Philosopher philosopher = PhilosopherFactory.getPhilosopher(id);
-        var agent = PhilosopherAgentExecutor.graphBuilder().chatClient(this.chatClient).conversationId(philosopher.getId())
-                .build(philosopherService)
-                .compile(CompileConfig.builder()
-                        .build());
-        var runnableConfig = RunnableConfig.builder().threadId(id).build();
-        var result = agent.invoke(Map.<String, Object>of(PhilosopherState.PN_KEY, philosopher.getName(),
-                PhilosopherState.PS_KEY, philosopher.getStyle(), PhilosopherState.PP_KEY, philosopher.getPerspective(),
-                "messages", new UserMessage(value.get("message"))), runnableConfig).orElseThrow();
+        var agent = PhilosopherAgentExecutor.graphBuilder().build(philosopherService)
+                .compile(CompileConfig.builder().build());
+        var runnableConfig = RunnableConfig.builder().build();
+        var result = agent.invoke(Map.<String, Object>of(
+            PhilosopherState.PN_KEY, philosopher.getName(),
+            PhilosopherState.PS_KEY, philosopher.getStyle(), 
+            PhilosopherState.PP_KEY, philosopher.getPerspective(),
+            PhilosopherState.CONVERSATION_ID_KEY, philosopher.getId(),
+            "messages", new UserMessage(value.get("message"))), runnableConfig).orElseThrow();
         // Use getContent() if available, otherwise fallback to toString()
         String output = result.lastMessage().map(content -> content.getText()).orElse("UNKNOWN");
         log.info(output);

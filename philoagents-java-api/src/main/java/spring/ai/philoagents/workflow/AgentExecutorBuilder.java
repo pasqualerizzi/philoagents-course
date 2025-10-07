@@ -6,17 +6,15 @@ import java.util.Objects;
 
 import org.bsc.langgraph4j.serializer.StateSerializer;
 import org.bsc.langgraph4j.state.AgentState;
-import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.support.ToolCallbacks;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 
 public abstract class AgentExecutorBuilder<B extends AgentExecutorBuilder<B, S>, S extends AgentState> {
         StateSerializer<S> stateSerializer;
-    String conversationId;
+
     String systemMessage;
     boolean streaming = false;
-    ChatClient chatClient;
 
     final List<ToolCallback> tools = new ArrayList<>();
     
@@ -66,15 +64,4 @@ public abstract class AgentExecutorBuilder<B extends AgentExecutorBuilder<B, S>,
         this.tools.addAll(List.of(tools));
         return result();
     }
-
-    public B conversationId(String conversationId) {
-        this.conversationId = conversationId;
-        return result();
-    }
-
-    public B chatClient(ChatClient chatClient) {
-        this.chatClient = chatClient;
-        return result();
-    }
-
 }

@@ -19,17 +19,9 @@ import static org.bsc.langgraph4j.utils.CollectionsUtils.entryOf;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-
 import org.bsc.langgraph4j.CompileConfig;
 import org.bsc.langgraph4j.RunnableConfig;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -42,20 +34,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class ChatController {
 
   private PhilosopherService philosopherService;
-  private ChatClient chatClient;
-  private ChatModel chatModel;
 
   public ChatController(
-      PhilosopherService philosopherService, ChatModel chatModel) {
+      PhilosopherService philosopherService) {
     this.philosopherService = philosopherService;
-    this.chatModel = chatModel;
-    ChatMemory chatMemory = MessageWindowChatMemory.builder().build();
-    Objects.requireNonNull(this.chatModel, "chatModel cannot be null!");
-    var toolOptions = ToolCallingChatOptions.builder().internalToolExecutionEnabled(true).build();
-    var chatClientBuilder = ChatClient.builder(this.chatModel)
-        .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
-        .defaultOptions(toolOptions);
-    this.chatClient = chatClientBuilder.build();
   }
 
   @Tag(name = "REST chat", description = "Chat with agents")
@@ -63,15 +45,13 @@ public class ChatController {
   public ResponseEntity<Object> chat(@RequestBody ChatBody chatBody) throws Exception {
     log.info("Starting Multi-Agent AI Application");
     Philosopher philosopher = PhilosopherFactory.getPhilosopher(chatBody.philosopher_id());
-    var agent = PhilosopherAgentExecutor.graphBuilder().chatClient(chatClient).conversationId(philosopher.getId())
-        .build(philosopherService)
-        .compile(CompileConfig.builder()
-            .build());
-    var runnableConfig = RunnableConfig.builder().threadId(philosopher.getId()).build();
+    var agent = PhilosopherAgentExecutor.graphBuilder().build(philosopherService).compile(CompileConfig.builder().build());
+    var runnableConfig = RunnableConfig.builder().build();
     var result = agent.invoke(Map.<String, Object>of(
         PhilosopherState.PN_KEY, philosopher.getId(),
         PhilosopherState.PS_KEY, philosopher.getStyle(),
         PhilosopherState.PP_KEY, philosopher.getPerspective(),
+        PhilosopherState.CONVERSATION_ID_KEY, philosopher.getId(),
         "messages", new UserMessage(chatBody.message())), runnableConfig)
         .orElseThrow();
     // Use getContent() if available, otherwise fallback to toString()
