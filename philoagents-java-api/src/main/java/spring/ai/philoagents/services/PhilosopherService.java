@@ -75,7 +75,8 @@ public class PhilosopherService {
                 promptMessages.addAll(state.messages());
                 return chatClient.prompt(new Prompt(promptMessages))
                                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, state.getConversationId()))
-                                .tools(retrievePhilosopherContext).call().chatResponse();
+                                .tools(retrievePhilosopherContext)
+                                .call().chatResponse();
         }
 
         public ChatResponse getConversationSummary(PhilosopherState state) throws Exception {

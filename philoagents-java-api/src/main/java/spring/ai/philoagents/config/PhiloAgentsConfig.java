@@ -25,11 +25,9 @@ public class PhiloAgentsConfig {
     public ChatClient chatClient() {
         ChatMemory chatMemory = MessageWindowChatMemory.builder().build();
         Objects.requireNonNull(this.chatModel, "chatModel cannot be null!");
-        var toolOptions = ToolCallingChatOptions.builder().internalToolExecutionEnabled(true).build();
         var chatClientBuilder = ChatClient.builder(this.chatModel)
                 .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory)
                 .conversationId("default").build())
-                .defaultOptions(toolOptions)
                 .defaultSystem("You are a helpful AI Assistant answering questions.");
         return chatClientBuilder.build();
     }
