@@ -3,6 +3,8 @@
 This project is a Spring Boot microservice integrated with SPRING AI framework that wants to enrich the **PhiloAgents** course by <b><a href="https://theneuralmaze.substack.com/">The Neural Maze</a></b> offering a Java version of the Python backend philoagents-api present in the original project.
 The goal of this document is to describe how this backend API is done and how to use this backend instead of the original python one provided in the project mentioned above.
 
+I kept the Python backend to demonstrate that it's exactly replaceable by the Java Backend without changing a single line of the frontend service. 
+
 It provides RESTful APIs and a (non stomp) websocket endpoint for managing and interacting with philosophical agents based on Java technologies instead of the original python ones.
 The service is designed for modularity and scalability, making it easy to integrate with other microservices in the ecosystem.
 
@@ -108,4 +110,4 @@ You can play with the agent workflow visiting `http://localhost:8080/index.html`
 
 ---
 
-Feel free to contribute or customize the service for your needs!
+Feel free to contribute or customize or suggest fixes (particularly about this file)!
