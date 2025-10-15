@@ -13,7 +13,7 @@ services:
     networks:
       - philoagents-network
   api:
-    profiles: ["python"]
+    profiles: [python]
     container_name: philoagents-api
     build:
       context: ./philoagents-api
@@ -27,38 +27,19 @@ services:
     networks:
       - philoagents-network
   java-api:
-    profiles: ["java"]
+    profiles: [java]
     container_name: philoagents-java-api
     build:
       context: ./philoagents-java-api
       dockerfile: Dockerfile
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://philoagents:philoagents@local_dev_atlas:27017/?directConnection=true
-      - PHILOAGENTS_LANGGRAPH_POSTGRESSAVER_HOST=local_pg
-      - PHILOAGENTS_LANGGRAPH_POSTGRESSAVER_PORT=5432
-      - PHILOAGENTS_LANGGRAPH_POSTGRESSAVER_DATABASE=philoagents-store
-      - PHILOAGENTS_LANGGRAPH_POSTGRESSAVER_USERNAME=postgres
-      - PHILOAGENTS_LANGGRAPH_POSTGRESSAVER_PASSWORD=postgres
-      - PHILOAGENTS_LANGGRAPH_POSTGRESSAVER_DROPTABLEFIRST=true
-      - PHILOAGENTS_LANGGRAPH_POSTGRESSAVER_CREATETABLES=true
     ports:
       - "8000:8000"
+    env_file:
+      - ./philoagents-java-api/.env      
     networks:
-      - philoagents-network
-  local_pg:
-    profiles: ["java"]  
-    image: postgres:15
-    container_name: local_pg
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=philoagents-store
-    ports:
-      - "5433:5432"
-    volumes:
-      - pg_data:/var/lib/postgresql/data
-    networks:
-      - philoagents-network      
+      - philoagents-network    
   ui:
     container_name: philoagents-ui
     build:
@@ -70,13 +51,40 @@ services:
       - ./philoagents-ui:/app
       - /app/node_modules
     depends_on:
-      - api
+      - java-api
     networks:
       - philoagents-network
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./philoagents-java-api/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"      
+    networks:
+      - philoagents-network      
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./philoagents-java-api/monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./philoagents-java-api/monitoring/grafana/dashboards:/etc/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/dashboards/ai-metrics-dashboard.json
+    depends_on:
+      - prometheus      
+    networks:
+      - philoagents-network      
 
 volumes:
   data:
   config:
+  grafana-storage:
 
 networks:
   philoagents-network:
