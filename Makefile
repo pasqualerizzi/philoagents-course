@@ -10,10 +10,10 @@ infrastructure-build:
 	docker compose build
 
 infrastructure-up:
-	docker compose up --build -d --profile python
+	docker compose --profile python up --build -d
 
 java-infrastructure-up:
-	docker compose up --build -d --profile java
+	docker compose --profile java up --build -d
 
 infrastructure-stop:
 	docker compose stop
