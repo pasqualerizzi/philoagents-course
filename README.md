@@ -29,6 +29,8 @@ git clone https://github.com/pasqualerizzi/philoagents-course.git
 cd philoagents-java-api
 ```
 
+Add .env file into philoagents-java-api folder with your api key using the property "SPRING_AI_OPENAI_API-KEY"
+
 ### 2. Installation
 
 ```bash
