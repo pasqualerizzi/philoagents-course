@@ -1,9 +1,9 @@
 # PhiloAgents Spring API Fork
 
-This project is a Spring Boot microservice integrated with SPRING AI framework that wants to enrich the **PhiloAgents** course by <b><a href="https://theneuralmaze.substack.com/">The Neural Maze</a></b> offering a Java version of the Python backend philoagents-api present in the original project.
+This project contains a Spring Boot microservice "philoagents-java-api" integrated with SPRING AI framework that wants to enrich the **PhiloAgents** course by <b><a href="https://theneuralmaze.substack.com/">The Neural Maze</a></b> offering a Java version of the Python backend "philoagents-api" present in the original project.
 The goal of this document is to describe how this backend API is done and how to use this backend instead of the original python one provided in the project mentioned above.
 
-I kept the Python backend to demonstrate that it's exactly replaceable by the Java Backend without changing a single line of the frontend service. 
+I kept the Python backend to demonstrate that it's exactly replaceable by the Java Backend without changing a single line of the frontend service or the long-memory collection structure. 
 
 It provides RESTful APIs and a (non stomp) websocket endpoint for managing and interacting with philosophical agents based on Java technologies instead of the original python ones.
 The service is designed for modularity and scalability, making it easy to integrate with other microservices in the ecosystem.
@@ -29,13 +29,16 @@ git clone https://github.com/pasqualerizzi/philoagents-course.git
 cd philoagents-java-api
 ```
 
-Add .env file into philoagents-java-api folder with your api key using the property "SPRING_AI_OPENAI_API-KEY"
-
 ### 2. Installation
 
 ```bash
 run mvn clean install
 ```
+
+### 3. Environment configuration
+
+Add .env file into philoagents-java-api folder with your api key using the property "SPRING_AI_OPENAI_API-KEY"
+
 
 # 📁 Project Structure
 
@@ -49,6 +52,7 @@ src
     │   ├── controllers/                # Presentation layer (REST controllers)
     │   ├── entities/                   # Domain entities
     │   ├── handlers/                   # Exception or event handlers
+    │   ├── override/                   # MongoDBVectoreStore override to adapt to the original collection structure
     │   ├── repository/                 # Data access layer (repositories)
     │   ├── services/                   # Service layer (business logic)
     │   ├── tools/                      # Utility classes/tools
@@ -62,14 +66,26 @@ src
 
 # 🏗️ Set Up Your Local Infrastructure 
 
-We can use Docker to set up the local infrastructure (Agent API).
+We can use Docker to set up the local infrastructure (Game UI, Agent API (python or java), MongoDB, Prometheus, Graphana).
 
-As a base I strongly recommend to start from the section "Set Up Your Local Infrastructure" in <b><a href="https://github.com/pasqualerizzi/philoagents-course/blob/main/INSTALL_AND_USAGE.md">this file</a></b> forked from Neural Maze project.
+> [!WARNING]
+> Before running the command below, ensure you do not have any processes running on ports `27017` (MongoDB), `8000` (Agent API) and `8080` (Game UI).
 
 From the root `philoagents-course` directory, to start the Docker infrastructure with the Java backend, run:
 ```bash
 make java-infrastructure-up
 ```
+
+From the root `philoagents-course` directory, to stop the Docker infrastructure, run:
+```bash
+make infrastructure-stop
+```
+
+From the root `philoagents-course` directory, to build the Docker images (without running them), run:
+```bash
+make infrastructure-build
+```
+
 
 # ⚡️ Running the Code
 
@@ -100,15 +116,20 @@ Once you completed the previous step, connect locally your MongoDBCompass client
 }
 ```
 
-Now you're ready to run your Java backend.
+Now you're ready to use your Java backend.
+
+Next, you can access the game by typing in your browser:
+```
+http://localhost:8080
+```
 
 ## 🐝 API Documentation
 
-Once running, the SWAGGER API documentation will be available at `http://localhost:8080/swagger-ui/index.html`.
+Once running, the SWAGGER API documentation will be available at `http://localhost:8000/swagger-ui/index.html`.
 
 ## 🦜🕸️ Langgraph studio
 
-You can play with the agent workflow visiting `http://localhost:8080/index.html` as described in <a href="https://github.com/langgraph4j/langgraph4j/tree/main/studio">this document</a>
+You can play with the agent workflow visiting `http://localhost:8000/?instance=default` as described in <a href="https://github.com/langgraph4j/langgraph4j/tree/main/studio">this document</a>
 
 ---
 
