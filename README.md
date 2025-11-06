@@ -7,6 +7,9 @@ I kept the Python backend to demonstrate that it's exactly replaceable by the Ja
 
 It provides RESTful APIs and a (non stomp) websocket endpoint for managing and interacting with philosophical agents based on Java technologies instead of the original python ones.
 The service is designed for modularity and scalability, making it easy to integrate with other microservices in the ecosystem.
+This module contains EVALUATION unit tests (using bespoke-minicheck llm).
+This module provides OBSERVABILITY features. For more infos you can take a look to <b><a href="https://github.com/pasqualerizzi/philoagents-course/blob/main/philoagents-java-api/OBSERVABILITY.md">OBSERVABILITY.md</a> 
+
 
 ## Technologies Used
 
